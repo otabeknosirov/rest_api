@@ -54,7 +54,7 @@ func (DB *DBClient) CreateStation(c *gin.Context) {
 // RemoveStation handles the removing of resource
 func (DB DBClient) RemoveStation(c *gin.Context) {
 	id := c.Param("station-id")
-	statement, _ := DB.db.Prepare("delete from station where id=?")
+	statement, _ := DB.db.Prepare("delete from station where id=$1")
 	_, err := statement.Exec(id)
 	if err != nil {
 		log.Println(err)
@@ -70,7 +70,7 @@ func (DB DBClient) RemoveStation(c *gin.Context) {
 func (DB DBClient) GetStation(c *gin.Context) {
 	var station StationResource
 	id := c.Param("station_id")
-	err := DB.db.QueryRow("select ID, Name, CAST(OpeningTime as CHAR),CAST(ClosingTime as CHAR) from station where id=?", id).
+	err := DB.db.QueryRow("select ID, Name, CAST(OpeningTime as CHAR),CAST(ClosingTime as CHAR) from station where id=$1", id).
 		Scan(&station.ID, &station.Name, &station.OpeningTime, &station.ClosingTime)
 	if err != nil {
 		log.Println(err)
@@ -85,20 +85,13 @@ func (DB DBClient) GetStation(c *gin.Context) {
 }
 
 func main() {
-	// db, err := models.InitDB()
-	// if err != nil {
-	// 	log.Println(db)
-	// }
-	log.Println("------------")
 	db, err := InitDB()
-	log.Println("------------", db)
 	if err != nil {
 		log.Println(db)
 	}
 	dbclient := &DBClient{db: db}
 
 	if err != nil {
-		log.Println("------------", err)
 		panic(err)
 	}
 	defer db.Close()
